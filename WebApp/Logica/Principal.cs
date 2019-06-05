@@ -11,52 +11,15 @@ namespace Logica
 {
     public class Principal
     {
-        /*
-         public void EscribirSucursales(List<Sucursal> sucursales)
+        public List<Usuario> Usuarios { get; set; }
+        public List<Hijo> Hijos { get; set; }
+
+        public Principal()
         {
-            string path = @"C:\Datos\ArchivoSucursales.txt";
-            using (StreamWriter archivo = new System.IO.StreamWriter(path, false))
-            {
-                string output = JsonConvert.SerializeObject(sucursales);
-                archivo.Write(output);
-            }
+            Usuarios = new List<Usuario>();
+            Hijos = new List<Hijo>();
         }
-
-        public List<Sucursal> ObtenerSucursales()
-        {
-            string path = @"C:\Datos\ArchivoSucursales.txt";
-            List<Sucursal> lista = new List<Sucursal>();
-            using (StreamReader leer = new StreamReader(path))
-            {
-                string contenido = leer.ReadToEnd();
-                lista = JsonConvert.DeserializeObject<List<Sucursal>>(contenido);
-            }
-            if (lista == null)// ==> devolver 
-                return new List<Sucursal>();
-            else
-                return lista.Where(x => x.Eliminado == false).ToList();
-        } 
-
-
-        public Mensaje AltaDeSucursal(Sucursal sucursal)
-        {
-            Mensaje mensaje = new Mensaje() { Realizado = false, Descripción="Hay campos vacíos."};
-            if (sucursal.Ciudad != "" & sucursal.CodigoPostal != 0 & sucursal.Direccion != "" & sucursal.TasaDeInteres != 0)
-            {
-                Sucursales = ObtenerSucursales();
-                int c = Sucursales.Count() + 1;
-                sucursal.ID = c;
-                Sucursales.Add(sucursal);
-                EscribirSucursales(Sucursales);
-                mensaje.Realizado = true;
-                mensaje.Descripción = "Se ha completado la acción correctamente.";
-            }
-            
-            return mensaje;
-        }
-         
-         
-         */
+        
 
         public UsuarioLogueado Loguear (string email, string clave)
         {
@@ -68,18 +31,17 @@ namespace Logica
                 {
                     usuario.Email = email;
                     usuario.Roles = item.Roles;
-                    if (usuario.Roles[0] == Roles.Directora)
+                   
+                    List<Usuario> usuarios = ObtenerUsuarios();
+                    foreach (var usu in usuarios)
                     {
-                        List<Directora> directoras = ObtenerDirectoras();
-                        foreach (var dire in directoras)
-                        {
-                            if (dire.Email == email)
-                            {
-                                usuario.Nombre = dire.Nombre;
-                                usuario.Apellido = dire.Apellido;
-                            }
+                        if (usu.Email == email)
+                        { 
+                            usuario.Nombre = usu.Nombre;
+                            usuario.Apellido = usu.Apellido;
                         }
                     }
+                    
                 }
             }
             return usuario;
@@ -110,16 +72,248 @@ namespace Logica
             }
         }
 
-        public Resultado AltaDirectora(Directora directora, UsuarioLogueado usuarioLogueado)
+        public void EscribirClaves(List<Clave> claves)
+        {
+            string path = @"C:\Datos\ArchivoClaves.txt";
+            using (StreamWriter archivo = new System.IO.StreamWriter(path, false))
+            {
+                string output = JsonConvert.SerializeObject(claves);
+                archivo.Write(output);
+            }
+        }
+
+        public Resultado ADirectora(Directora directora, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            if (VerificarCampos(resultado, directora, usuarioLogueado))
+            {
+                Usuarios.Add(directora);
+                EscribirUsuarios(Usuarios);
+                List<Clave> claves = ObtenerClaves();
+                Clave clave = new Clave();
+                Random random = new Random();
+                clave.Contraseña = random.Next(10000000, 99999999).ToString();
+                clave.Email = directora.Email;
+                clave.Roles = usuarioLogueado.Roles;
+                claves.Add(clave);
+                EscribirClaves(claves);
+            }
+                            
+            return resultado;
+        }
+
+        public Resultado MDirectora (int id, Directora directora, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            if (VerificarCampos(resultado,directora,usuarioLogueado))
+            {
+                List<Usuario> usuarios = ObtenerUsuarios();
+                bool band = false;
+                foreach (var usuario in usuarios)
+                {
+                    if (usuario.Id == id & usuario is Directora)
+                    {
+                        List<Clave> claves = ObtenerClaves();
+                        foreach (var clave in claves)
+                        {
+                            if (usuario.Email == usuarioLogueado.Email)
+                            {
+                                clave.Email = directora.Email;
+                                EscribirClaves(claves);
+                                band = true;
+                                break;
+                            }
+                        }                        
+                    }
+                }
+                if (band == false)
+                {
+                    resultado.Errores.Add("No se encontró el usuario.");
+                }
+                else
+                {
+                    Usuario direc = Usuarios.Where(x => x.Id == id && x is Directora).FirstOrDefault();
+                    Usuarios.Remove(direc);
+                    Usuarios.Add(directora);
+                    EscribirUsuarios(Usuarios);
+                }
+            }
+              
+            
+            return resultado;
+        }
+
+        public Resultado BDirectora (int id, Directora directora, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
             Roles rol = Roles.Directora;
             if (rol != usuarioLogueado.RolSeleccionado)
                 resultado.Errores.Add("El rol seleccionado no es el de Directora.");
             else
+            {
+                List<Clave> claves = ObtenerClaves();
+                bool band = false;
+                int x = -1;
+                int x2 = -1;
+                foreach (var item in claves)
+                {
+                    x++;
+                    if (item.Email == usuarioLogueado.Email)
+                    {
+                        foreach (var item2 in Usuarios)
+                        {
+                            x2++;
+                            if (item2.Id == id & item2 is Directora)
+                            {
+                                band = true;
+                                break;
+                            }
 
-                return resultado;
+                        }
+                        break;
+                    }
 
+                }
+                if (band == true)
+                {
+                    claves.RemoveAt(x);
+                    EscribirClaves(claves);
+                    Usuarios.RemoveAt(x2);
+                    EscribirUsuarios(Usuarios);
+                }
+                else
+                {
+                    resultado.Errores.Add("No se encontró el usuario.");
+                }
+
+            }
+            return resultado;
+        }
+
+        public bool VerificarCampos(Resultado resul, Directora directora, UsuarioLogueado usuarioLog)
+        {
+            Roles rol = Roles.Directora;
+            if (rol != usuarioLog.RolSeleccionado)
+                resul.Errores.Add("El rol seleccionado no es el de Directora.");
+            else
+            {
+                if (directora.Nombre == null)
+                    resul.Errores.Add("El nombre es un campo obligatorio.");
+                else
+                {
+                    if (directora.Apellido == null)
+                        resul.Errores.Add("El apellido es un campo obligatorio.");
+                    else
+                    {
+                        if (directora.Email == null)
+                            resul.Errores.Add("El email no es válido o está vacío.");
+                        else
+                        {
+                            if (directora.Cargo == null)
+                                resul.Errores.Add("El cargo es un campo obligatorio.");
+                            else
+                            {
+                                if (directora.FechaIngreso == null)
+                                    resul.Errores.Add("La fecha de ingreso es un campo obligatorio.");
+                                else
+                                {
+                                    if (directora.Institucion == null)
+                                        resul.Errores.Add("La institucion es un campo obligatorio.");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return resul.EsValido;
+        }
+
+        public bool VerificarCampos(Resultado resul, Docente docente, UsuarioLogueado usuarioLog)
+        {
+            Roles rol = Roles.Docente;
+            if (rol != usuarioLog.RolSeleccionado)
+                resul.Errores.Add("El rol seleccionado no es el de Docente.");
+            else
+            {
+                if (docente.Apellido == null)
+                    resul.Errores.Add("El apellido es un campo obligatorio.");
+                else
+                {
+                    if (docente.Email == null)
+                        resul.Errores.Add("El email no es válido o está vacío.");
+                    else
+                    {
+                        if (docente.Nombre == null)
+                            resul.Errores.Add("El nombre es un campo obligatorio.");
+                        else
+                        {
+                            if (docente.Salas.Count() == 0)
+                                resul.Errores.Add("El docente tiene que tener salas asignadas.");
+                        }
+                    }
+                }
+            }
+            return resul.EsValido;
+        }
+
+        public bool VerificarCampos(Resultado resul, Padre padre, UsuarioLogueado usuarioLog)
+        {
+            Roles rol = Roles.Padre;
+            if (rol != usuarioLog.RolSeleccionado)
+                resul.Errores.Add("El rol seleccionado no es el de Docente.");
+            else
+            {
+                if (padre.Apellido == null)
+                    resul.Errores.Add("El apellido es un campo obligatorio.");
+                else
+                {
+                    if (padre.Email == null)
+                        resul.Errores.Add("El email no es válido o está vacío.");
+                    else
+                    {
+                        if (padre.Nombre == null)
+                            resul.Errores.Add("El nombre es un campo obligatorio.");
+                        else
+                        {
+                            if (padre.Hijos.Count() == 0)
+                                resul.Errores.Add("El padre tiene que tener hijos.");
+                        }
+                    }
+                }
+            }
+            return resul.EsValido;
+        }
+
+        public bool VerificarCampos(Resultado resul, Hijo hijo, UsuarioLogueado usuarioLog)
+        {
+            
+                if (hijo.Apellido == null)
+                    resul.Errores.Add("El apellido es un campo obligatorio.");
+                else
+                {
+                    if (hijo.Email == null)
+                        resul.Errores.Add("El email no es válido o está vacío.");
+                    else
+                    {
+                        if (hijo.Nombre == null)
+                            resul.Errores.Add("El nombre es un campo obligatorio.");
+                        else
+                        {
+                            if (hijo.Institucion == null)
+                                resul.Errores.Add("El alumno debe asistir a una institucion.");
+                            else
+                            {
+                                if (hijo.FechaNacimiento == null)
+                                {
+                                    resul.Errores.Add("La fecha de nacimiento es un campo obligatorio.");
+                                }
+                            }
+                        }
+                    }
+                }
+            
+            return resul.EsValido;
         }
 
         public List<Clave> ObtenerClaves()
