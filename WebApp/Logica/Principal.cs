@@ -11,17 +11,21 @@ namespace Logica
 {
     public class Principal
     {
-        public List<Usuario> Usuarios { get; set; }
-        public List<Hijo> Hijos { get; set; }
-
         public Principal()
         {
+            string usuarios = @"C:\Datos\ArchivoUsuarios.txt";
+            if (!File.Exists(usuarios))
+                File.Create(usuarios);
+            string claves = @"C:\Datos\ArchivoClaves.txt";
+            if (!File.Exists(claves))
+                File.Create(claves);
             Usuarios = new List<Usuario>();
             Hijos = new List<Hijo>();
         }
-        
+        public List<Usuario> Usuarios { get; set; }
+        public List<Hijo> Hijos { get; set; }
 
-        public UsuarioLogueado Loguear (string email, string clave)
+        public UsuarioLogueado Loguear(string email, string clave)
         {
             UsuarioLogueado usuario = null;
             List<Clave> claves = ObtenerClaves();
@@ -31,17 +35,17 @@ namespace Logica
                 {
                     usuario.Email = email;
                     usuario.Roles = item.Roles;
-                   
+
                     List<Usuario> usuarios = ObtenerUsuarios();
                     foreach (var usu in usuarios)
                     {
                         if (usu.Email == email)
-                        { 
+                        {
                             usuario.Nombre = usu.Nombre;
                             usuario.Apellido = usu.Apellido;
                         }
                     }
-                    
+
                 }
             }
             return usuario;
@@ -98,14 +102,14 @@ namespace Logica
                 claves.Add(clave);
                 EscribirClaves(claves);
             }
-                            
+
             return resultado;
         }
 
-        public Resultado MDirectora (int id, Directora directora, UsuarioLogueado usuarioLogueado)
+        public Resultado MDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
-            if (VerificarCampos(resultado,directora,usuarioLogueado))
+            if (VerificarCampos(resultado, directora, usuarioLogueado))
             {
                 List<Usuario> usuarios = ObtenerUsuarios();
                 bool band = false;
@@ -123,7 +127,7 @@ namespace Logica
                                 band = true;
                                 break;
                             }
-                        }                        
+                        }
                     }
                 }
                 if (band == false)
@@ -138,12 +142,12 @@ namespace Logica
                     EscribirUsuarios(Usuarios);
                 }
             }
-              
-            
+
+
             return resultado;
         }
 
-        public Resultado BDirectora (int id, Directora directora, UsuarioLogueado usuarioLogueado)
+        public Resultado BDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
             Roles rol = Roles.Directora;
@@ -420,32 +424,32 @@ namespace Logica
 
         public bool VerificarCampos(Resultado resul, Hijo hijo, UsuarioLogueado usuarioLog)
         {
-            
-                if (hijo.Apellido == null)
-                    resul.Errores.Add("El apellido es un campo obligatorio.");
+
+            if (hijo.Apellido == null)
+                resul.Errores.Add("El apellido es un campo obligatorio.");
+            else
+            {
+                if (hijo.Email == null)
+                    resul.Errores.Add("El email no es válido o está vacío.");
                 else
                 {
-                    if (hijo.Email == null)
-                        resul.Errores.Add("El email no es válido o está vacío.");
+                    if (hijo.Nombre == null)
+                        resul.Errores.Add("El nombre es un campo obligatorio.");
                     else
                     {
-                        if (hijo.Nombre == null)
-                            resul.Errores.Add("El nombre es un campo obligatorio.");
+                        if (hijo.Institucion == null)
+                            resul.Errores.Add("El alumno debe asistir a una institucion.");
                         else
                         {
-                            if (hijo.Institucion == null)
-                                resul.Errores.Add("El alumno debe asistir a una institucion.");
-                            else
+                            if (hijo.FechaNacimiento == null)
                             {
-                                if (hijo.FechaNacimiento == null)
-                                {
-                                    resul.Errores.Add("La fecha de nacimiento es un campo obligatorio.");
-                                }
+                                resul.Errores.Add("La fecha de nacimiento es un campo obligatorio.");
                             }
                         }
                     }
                 }
-            
+            }
+
             return resul.EsValido;
         }
 
@@ -524,6 +528,5 @@ namespace Logica
             else
                 return lista;
         }
-
     }
 }

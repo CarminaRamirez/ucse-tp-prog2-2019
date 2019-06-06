@@ -10,8 +10,12 @@ namespace Implementacion
 {
     public class ImplementacionWeb : IServicioWeb
     {
-        Principal principal = new Principal();
-
+        public Principal principal { get; set; }
+        public ImplementacionWeb()
+        {
+            principal = new Principal();
+        }
+        
         public Resultado AltaAlumno(Hijo hijo, UsuarioLogueado usuarioLogueado)
         {
             throw new NotImplementedException();
