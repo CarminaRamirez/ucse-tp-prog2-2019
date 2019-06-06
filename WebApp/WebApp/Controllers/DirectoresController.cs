@@ -6,16 +6,18 @@ using System.Web;
 using System.Collections.Generic;
 using System;
 using System.Net.Mail;
-using WebApp;
+using WebApp.Controllers;
 using Contratos;
 using Mocks;
+using Implementacion;
+using Logica;
 
 namespace AnBem.WebApplication.Controllers
 {
-    //[Authorize]
+    
     public class DirectoresController : BaseController
     {
-        private static IServicioWeb servicio = new MockService();
+        private static IServicioWeb servicio = new ImplementacionWeb();
         // GET: /Directoras/
         [HttpGet]
         public async Task<ActionResult> Index()

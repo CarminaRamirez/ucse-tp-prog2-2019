@@ -190,6 +190,139 @@ namespace Logica
             return resultado;
         }
 
+        public Resultado ADocente(Docente docente, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            if (VerificarCampos(resultado, docente, usuarioLogueado))
+            {
+                Usuarios.Add(docente);
+                EscribirUsuarios(Usuarios);
+                List<Clave> claves = ObtenerClaves();
+                Clave clave = new Clave();
+                Random random = new Random();
+                clave.Contraseña = random.Next(10000000, 99999999).ToString();
+                clave.Email = docente.Email;
+                clave.Roles = usuarioLogueado.Roles;
+                claves.Add(clave);
+                EscribirClaves(claves);
+            }
+
+            return resultado;
+        }
+
+
+        public Resultado BDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            Roles rol = Roles.Docente;
+            if (rol != usuarioLogueado.RolSeleccionado)
+                resultado.Errores.Add("El rol seleccionado no es el de Docente.");
+            else
+            {
+                List<Clave> claves = ObtenerClaves();
+                bool band = false;
+                int x = -1;
+                int x2 = -1;
+                foreach (var item in claves)
+                {
+                    x++;
+                    if (item.Email == usuarioLogueado.Email)
+                    {
+                        foreach (var item2 in Usuarios)
+                        {
+                            x2++;
+                            if (item2.Id == id & item2 is Docente)
+                            {
+                                band = true;
+                                break;
+                            }
+
+                        }
+                        break;
+                    }
+
+                }
+                if (band == true)
+                {
+                    claves.RemoveAt(x);
+                    EscribirClaves(claves);
+                    Usuarios.RemoveAt(x2);
+                    EscribirUsuarios(Usuarios);
+                }
+                else
+                {
+                    resultado.Errores.Add("No se encontró el usuario.");
+                }
+
+            }
+            return resultado;
+        }
+
+
+        public Resultado MDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            if (VerificarCampos(resultado, docente, usuarioLogueado))
+            {
+                List<Usuario> usuarios = ObtenerUsuarios();
+                bool band = false;
+                foreach (var usuario in usuarios)
+                {
+                    if (usuario.Id == id & usuario is Docente)
+                    {
+                        List<Clave> claves = ObtenerClaves();
+                        foreach (var clave in claves)
+                        {
+                            if (usuario.Email == usuarioLogueado.Email)
+                            {
+                                clave.Email = docente.Email;
+                                EscribirClaves(claves);
+                                band = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (band == false)
+                {
+                    resultado.Errores.Add("No se encontró el usuario.");
+                }
+                else
+                {
+                    Usuario direc = Usuarios.Where(x => x.Id == id && x is Docente).FirstOrDefault();
+                    Usuarios.Remove(direc);
+                    Usuarios.Add(docente);
+                    EscribirUsuarios(Usuarios);
+                }
+            }
+
+
+            return resultado;
+        }
+
+
+
+        public Resultado APadre(Padre padre, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            if (VerificarCampos(resultado, padre, usuarioLogueado))
+            {
+                Usuarios.Add(padre);
+                EscribirUsuarios(Usuarios);
+                List<Clave> claves = ObtenerClaves();
+                Clave clave = new Clave();
+                Random random = new Random();
+                clave.Contraseña = random.Next(10000000, 99999999).ToString();
+                clave.Email = padre.Email;
+                clave.Roles = usuarioLogueado.Roles;
+                claves.Add(clave);
+                EscribirClaves(claves);
+            }
+
+            return resultado;
+        }
+
+
         public bool VerificarCampos(Resultado resul, Directora directora, UsuarioLogueado usuarioLog)
         {
             Roles rol = Roles.Directora;
