@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,10 +11,17 @@ namespace Implementacion
 {
     public class ImplementacionWeb : IServicioWeb
     {
-        public Principal principal { get; set; }
+        private Principal Principal { get; set; }
         public ImplementacionWeb()
         {
-            principal = new Principal();
+            Principal = new Principal();
+            string usuarios = @"C:\Datos\ArchivoUsuarios.txt";
+            if (!File.Exists(usuarios))
+                File.Create(usuarios);
+            string claves = @"C:\Datos\ArchivoClaves.txt";
+            if (!File.Exists(claves))
+                File.Create(claves);
+            
         }
         
         public Resultado AltaAlumno(Hijo hijo, UsuarioLogueado usuarioLogueado)
@@ -23,7 +31,7 @@ namespace Implementacion
 
         public Resultado AltaDirectora(Directora directora, UsuarioLogueado usuarioLogueado)
         {
-            return principal.ADirectora(directora, usuarioLogueado);
+            return Principal.ADirectora(directora, usuarioLogueado);
         }
 
         public Resultado AltaDocente(Docente docente, UsuarioLogueado usuarioLogueado)
@@ -38,7 +46,7 @@ namespace Implementacion
 
         public Resultado AltaPadreMadre(Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.APadre(padre, usuarioLogueado);
         }
 
         public Resultado AsignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
@@ -68,7 +76,7 @@ namespace Implementacion
 
         public Resultado EditarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
         {
-            return principal.MDirectora(id, directora, usuarioLogueado);
+            return Principal.MDirectora(id, directora, usuarioLogueado);
         }
 
         public Resultado EditarDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
@@ -88,7 +96,7 @@ namespace Implementacion
 
         public Resultado EliminarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
         {
-            return principal.BDirectora(id, directora, usuarioLogueado);
+            return Principal.BDirectora(id, directora, usuarioLogueado);
         }
 
         public Resultado EliminarDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
@@ -173,7 +181,7 @@ namespace Implementacion
 
         public UsuarioLogueado ObtenerUsuario(string email, string clave)
         {
-            return principal.Loguear(email,clave);
+            return Principal.Loguear(email,clave);
         }
 
         public Resultado ResponderNota(Nota nota, Comentario nuevoComentario, UsuarioLogueado usuarioLogueado)

@@ -10,7 +10,6 @@ using WebApp.Controllers;
 using Contratos;
 using Mocks;
 using Implementacion;
-using Logica;
 
 namespace AnBem.WebApplication.Controllers
 {

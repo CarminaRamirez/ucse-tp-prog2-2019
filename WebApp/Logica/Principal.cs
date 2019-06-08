@@ -13,12 +13,12 @@ namespace Logica
     {
         public Principal()
         {
-            string usuarios = @"C:\Datos\ArchivoUsuarios.txt";
+            /*string usuarios = @"C:\Datos\ArchivoUsuarios.txt";
             if (!File.Exists(usuarios))
                 File.Create(usuarios);
             string claves = @"C:\Datos\ArchivoClaves.txt";
             if (!File.Exists(claves))
-                File.Create(claves);
+                File.Create(claves);*/
             Usuarios = new List<Usuario>();
             Hijos = new List<Hijo>();
         }
@@ -27,20 +27,19 @@ namespace Logica
 
         public UsuarioLogueado Loguear(string email, string clave)
         {
-            UsuarioLogueado usuario = null;
+            UsuarioLogueado usuario = new UsuarioLogueado();
             List<Clave> claves = ObtenerClaves();
             foreach (var item in claves)
             {
-                if (item.Email == email & item.Contraseña == clave)
+                if (item.Email == email & item.Contrasena == clave)
                 {
-                    usuario.Email = email;
-                    usuario.Roles = item.Roles;
-
                     List<Usuario> usuarios = ObtenerUsuarios();
                     foreach (var usu in usuarios)
                     {
                         if (usu.Email == email)
                         {
+                            usuario.Email = email;
+                            usuario.Roles = item.Roles;
                             usuario.Nombre = usu.Nombre;
                             usuario.Apellido = usu.Apellido;
                         }
@@ -96,13 +95,12 @@ namespace Logica
                 List<Clave> claves = ObtenerClaves();
                 Clave clave = new Clave();
                 Random random = new Random();
-                clave.Contraseña = random.Next(10000000, 99999999).ToString();
+                clave.Contrasena = random.Next(10000000, 99999999).ToString();
                 clave.Email = directora.Email;
                 clave.Roles = usuarioLogueado.Roles;
                 claves.Add(clave);
                 EscribirClaves(claves);
             }
-
             return resultado;
         }
 
@@ -142,8 +140,6 @@ namespace Logica
                     EscribirUsuarios(Usuarios);
                 }
             }
-
-
             return resultado;
         }
 
@@ -204,13 +200,12 @@ namespace Logica
                 List<Clave> claves = ObtenerClaves();
                 Clave clave = new Clave();
                 Random random = new Random();
-                clave.Contraseña = random.Next(10000000, 99999999).ToString();
+                clave.Contrasena = random.Next(10000000, 99999999).ToString();
                 clave.Email = docente.Email;
                 clave.Roles = usuarioLogueado.Roles;
                 claves.Add(clave);
                 EscribirClaves(claves);
             }
-
             return resultado;
         }
 
@@ -244,7 +239,6 @@ namespace Logica
                         }
                         break;
                     }
-
                 }
                 if (band == true)
                 {
@@ -299,8 +293,6 @@ namespace Logica
                     EscribirUsuarios(Usuarios);
                 }
             }
-
-
             return resultado;
         }
 
@@ -316,13 +308,12 @@ namespace Logica
                 List<Clave> claves = ObtenerClaves();
                 Clave clave = new Clave();
                 Random random = new Random();
-                clave.Contraseña = random.Next(10000000, 99999999).ToString();
+                clave.Contrasena = random.Next(10000000, 99999999).ToString();
                 clave.Email = padre.Email;
                 clave.Roles = usuarioLogueado.Roles;
                 claves.Add(clave);
                 EscribirClaves(claves);
             }
-
             return resultado;
         }
 
@@ -449,7 +440,6 @@ namespace Logica
                     }
                 }
             }
-
             return resul.EsValido;
         }
 
