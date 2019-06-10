@@ -21,9 +21,15 @@ namespace Logica
                 File.Create(claves);*/
             Usuarios = new List<Usuario>();
             Hijos = new List<Hijo>();
+            Directoras = new List<Directora>();
         }
         public List<Usuario> Usuarios { get; set; }
         public List<Hijo> Hijos { get; set; }
+        public List<Directora> Directoras { get; set; }
+        public List<Padre> Padres { get; set; }
+        public List<Docente> Docentes { get; set; }
+        public List<Nota> Notas { get; set; }
+
 
         public UsuarioLogueado Loguear(string email, string clave)
         {
@@ -33,18 +39,73 @@ namespace Logica
             {
                 if (item.Email == email & item.Contrasena == clave)
                 {
-                    List<Usuario> usuarios = ObtenerUsuarios();
-                    foreach (var usu in usuarios)
+                    Roles rol = item.Roles[0];
+                    if (rol == Roles.Directora)
                     {
-                        if (usu.Email == email)
+                        List<Directora> directoras = ObtenerDirectoras();
+                        foreach (var dire in directoras)
                         {
-                            usuario.Email = email;
-                            usuario.Roles = item.Roles;
-                            usuario.Nombre = usu.Nombre;
-                            usuario.Apellido = usu.Apellido;
+                            if (dire.Email == email)
+                            {
+                                usuario.Email = email;
+                                usuario.Roles = item.Roles;
+                                usuario.Nombre = dire.Nombre;
+                                usuario.Apellido = dire.Apellido;
+                                usuario.RolSeleccionado = Roles.Directora;
+                            }
                         }
                     }
-
+                    else
+                    {
+                        if (rol == Roles.Docente)
+                        {
+                            List<Docente> docentes = ObtenerDocentes();
+                            foreach (var docente in docentes)
+                            {
+                                if (docente.Email == email)
+                                {
+                                    usuario.Email = email;
+                                    usuario.Roles = item.Roles;
+                                    usuario.Nombre = docente.Nombre;
+                                    usuario.Apellido = docente.Apellido;
+                                    usuario.RolSeleccionado = Roles.Directora;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (rol == Roles.Padre)
+                            {
+                                List<Padre> padres = ObtenerPadres();
+                                foreach (var padre in padres)
+                                {
+                                    if (padre.Email == email)
+                                    {
+                                        usuario.Email = email;
+                                        usuario.Roles = item.Roles;
+                                        usuario.Nombre = padre.Nombre;
+                                        usuario.Apellido = padre.Apellido;
+                                        usuario.RolSeleccionado = Roles.Directora;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                List<Hijo> hijos = ObtenerHijos();
+                                foreach (var hijo in hijos)
+                                {
+                                    if (hijo.Email == email)
+                                    {
+                                        usuario.Email = email;
+                                        usuario.Roles = item.Roles;
+                                        usuario.Nombre = hijo.Nombre;
+                                        usuario.Apellido = hijo.Apellido;
+                                        usuario.RolSeleccionado = Roles.Directora;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
             return usuario;
@@ -85,14 +146,30 @@ namespace Logica
             }
         }
 
+
+        public void EscribirDirectoras(List<Directora> directoras)
+        {
+            string path = @"C:\Datos\ArchivoDirectoras.txt";
+            using (StreamWriter archivo = new System.IO.StreamWriter(path, false))
+            {
+                string output = JsonConvert.SerializeObject(directoras);
+                archivo.Write(output);
+            }
+        }
+
         public Resultado ADirectora(Directora directora, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
             if (VerificarCampos(resultado, directora, usuarioLogueado))
             {
-                Usuarios.Add(directora);
-                EscribirUsuarios(Usuarios);
+                //Usuarios = ObtenerUsuarios();
+                Directoras = ObtenerDirectoras();
                 List<Clave> claves = ObtenerClaves();
+                directora.Id = claves.Count() + 1;
+                Usuarios.Add(directora);
+                Directoras.Add(directora);
+                EscribirDirectoras(Directoras);
+                //EscribirUsuarios(Usuarios);
                 Clave clave = new Clave();
                 Random random = new Random();
                 clave.Contrasena = random.Next(10000000, 99999999).ToString();
@@ -100,6 +177,7 @@ namespace Logica
                 clave.Roles = usuarioLogueado.Roles;
                 claves.Add(clave);
                 EscribirClaves(claves);
+                
             }
             return resultado;
         }
@@ -109,19 +187,27 @@ namespace Logica
             Resultado resultado = new Resultado();
             if (VerificarCampos(resultado, directora, usuarioLogueado))
             {
-                List<Usuario> usuarios = ObtenerUsuarios();
+                List<Directora> directoras = ObtenerDirectoras();
                 bool band = false;
-                foreach (var usuario in usuarios)
+                foreach (var dire in directoras)
                 {
-                    if (usuario.Id == id & usuario is Directora)
+                    if (dire.Id == id)
                     {
                         List<Clave> claves = ObtenerClaves();
                         foreach (var clave in claves)
                         {
-                            if (usuario.Email == usuarioLogueado.Email)
+                            if (clave.Email == usuarioLogueado.Email)
                             {
                                 clave.Email = directora.Email;
                                 EscribirClaves(claves);
+                                dire.Apellido = directora.Apellido;
+                                dire.Cargo = directora.Cargo;
+                                dire.FechaIngreso = directora.FechaIngreso;
+                                dire.Institucion = directora.Institucion;
+                                dire.Nombre = directora.Nombre;
+                                dire.Email = directora.Email;
+                                EscribirDirectoras(directoras);
+                                Directoras = directoras;
                                 band = true;
                                 break;
                             }
@@ -131,13 +217,6 @@ namespace Logica
                 if (band == false)
                 {
                     resultado.Errores.Add("No se encontró el usuario.");
-                }
-                else
-                {
-                    Usuario direc = Usuarios.Where(x => x.Id == id && x is Directora).FirstOrDefault();
-                    Usuarios.Remove(direc);
-                    Usuarios.Add(directora);
-                    EscribirUsuarios(Usuarios);
                 }
             }
             return resultado;
@@ -160,10 +239,10 @@ namespace Logica
                     x++;
                     if (item.Email == usuarioLogueado.Email)
                     {
-                        foreach (var item2 in Usuarios)
+                        foreach (var item2 in Directoras)
                         {
                             x2++;
-                            if (item2.Id == id & item2 is Directora)
+                            if (item2.Id == id)
                             {
                                 band = true;
                                 break;
@@ -178,16 +257,36 @@ namespace Logica
                 {
                     claves.RemoveAt(x);
                     EscribirClaves(claves);
-                    Usuarios.RemoveAt(x2);
-                    EscribirUsuarios(Usuarios);
+                    Directoras.RemoveAt(x2);
+                    EscribirDirectoras(Directoras);
                 }
                 else
                 {
                     resultado.Errores.Add("No se encontró el usuario.");
                 }
-
             }
             return resultado;
+        }
+
+        public Directora ObtenerDirectoraPorId(UsuarioLogueado usuarioLogueado, int id)
+        {
+            List<Clave> claves = ObtenerClaves();
+            Directora dire = new Directora();
+            foreach (var item in claves)
+            {
+                if (Roles.Directora == usuarioLogueado.RolSeleccionado)
+                    dire = ObtenerDirectoras().Where(x => x.Id == id).FirstOrDefault();
+            }
+            return dire;
+        }
+
+        public Grilla<Directora> ObtenerDirectoras(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
+        {
+            Grilla<Directora> grilla = new Grilla<Directora>();
+            List<Directora> lista = ObtenerDirectoras();
+            grilla.Lista = lista.Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal)).Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray();
+            grilla.CantidadRegistros = lista.Count;
+            return grilla;
         }
 
         public Resultado ADocente(Docente docente, UsuarioLogueado usuarioLogueado)
@@ -318,6 +417,36 @@ namespace Logica
         }
 
 
+        public Resultado AltaNota(Nota nota, Sala[] salas, Hijo[] hijos, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            if (usuarioLogueado.RolSeleccionado == Roles.Directora || usuarioLogueado.RolSeleccionado == Roles.Docente || usuarioLogueado.RolSeleccionado == Roles.Padre)
+            {
+                
+            }
+
+
+            return resultado;
+        }
+
+
+        public Resultado AsignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            List<Sala> salasDocente = new List<Sala>();
+            if (docente.Salas != null)
+                salasDocente = docente.Salas.ToList();
+
+            if (salasDocente.Any(x => x.Id == sala.Id) == false)
+                salasDocente.Add(sala);
+            else
+                resultado.Errores.Add("La sala ya se encuentra asignada.");
+
+            docente.Salas = salasDocente.ToArray();
+
+            return resultado;
+        }
+
         public bool VerificarCampos(Resultado resul, Directora directora, UsuarioLogueado usuarioLog)
         {
             Roles rol = Roles.Directora;
@@ -343,11 +472,6 @@ namespace Logica
                             {
                                 if (directora.FechaIngreso == null)
                                     resul.Errores.Add("La fecha de ingreso es un campo obligatorio.");
-                                else
-                                {
-                                    if (directora.Institucion == null)
-                                        resul.Errores.Add("La institucion es un campo obligatorio.");
-                                }
                             }
                         }
                     }

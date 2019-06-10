@@ -21,7 +21,10 @@ namespace Implementacion
             string claves = @"C:\Datos\ArchivoClaves.txt";
             if (!File.Exists(claves))
                 File.Create(claves);
-            
+            string directoras = @"C:\Datos\ArchivoDirectoras.txt";
+            if (!File.Exists(directoras))
+                File.Create(directoras);
+
         }
         
         public Resultado AltaAlumno(Hijo hijo, UsuarioLogueado usuarioLogueado)
@@ -131,12 +134,12 @@ namespace Implementacion
 
         public Directora ObtenerDirectoraPorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            throw new NotImplementedException();
+            return Principal.ObtenerDirectoraPorId(usuarioLogueado, id);
         }
 
         public Grilla<Directora> ObtenerDirectoras(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
-            throw new NotImplementedException();
+            return Principal.ObtenerDirectoras(usuarioLogueado, paginaActual, totalPorPagina, busquedaGlobal);
         }
 
         public Docente ObtenerDocentePorId(UsuarioLogueado usuarioLogueado, int id)
