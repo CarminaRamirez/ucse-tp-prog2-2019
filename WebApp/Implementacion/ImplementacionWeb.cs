@@ -44,7 +44,7 @@ namespace Implementacion
 
         public Resultado AltaNota(Nota nota, Sala[] salas, Hijo[] hijos, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.AltaNota(nota, salas, hijos, usuarioLogueado);
         }
 
         public Resultado AltaPadreMadre(Padre padre, UsuarioLogueado usuarioLogueado)

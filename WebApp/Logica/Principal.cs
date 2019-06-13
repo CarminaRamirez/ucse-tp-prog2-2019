@@ -13,12 +13,6 @@ namespace Logica
     {
         public Principal()
         {
-            /*string usuarios = @"C:\Datos\ArchivoUsuarios.txt";
-            if (!File.Exists(usuarios))
-                File.Create(usuarios);
-            string claves = @"C:\Datos\ArchivoClaves.txt";
-            if (!File.Exists(claves))
-                File.Create(claves);*/
             Usuarios = new List<Usuario>();
             Hijos = new List<Hijo>();
             Directoras = new List<Directora>();
@@ -165,7 +159,7 @@ namespace Logica
                 //Usuarios = ObtenerUsuarios();
                 Directoras = ObtenerDirectoras();
                 List<Clave> claves = ObtenerClaves();
-                directora.Id = claves.Count() + 1;
+                directora.Id = Directoras.Count() + 1;
                 Usuarios.Add(directora);
                 Directoras.Add(directora);
                 EscribirDirectoras(Directoras);
@@ -270,13 +264,13 @@ namespace Logica
 
         public Directora ObtenerDirectoraPorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            List<Clave> claves = ObtenerClaves();
+            //List<Clave> claves = ObtenerClaves();
             Directora dire = new Directora();
-            foreach (var item in claves)
-            {
+            //foreach (var item in claves)
+            //{
                 if (Roles.Directora == usuarioLogueado.RolSeleccionado)
                     dire = ObtenerDirectoras().Where(x => x.Id == id).FirstOrDefault();
-            }
+            //}
             return dire;
         }
 
@@ -284,7 +278,7 @@ namespace Logica
         {
             Grilla<Directora> grilla = new Grilla<Directora>();
             List<Directora> lista = ObtenerDirectoras();
-            grilla.Lista = lista.Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal)).Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray();
+            grilla.Lista = lista.Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal) || x.Email.Contains(busquedaGlobal)).Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray();
             grilla.CantidadRegistros = lista.Count;
             return grilla;
         }
@@ -416,16 +410,171 @@ namespace Logica
             return resultado;
         }
 
-
+        //HAY QUE HACER UN ARCHIVO DE NOTAS Y OBTENER NOTAS PARA ESCRIBIRLAS
         public Resultado AltaNota(Nota nota, Sala[] salas, Hijo[] hijos, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
-            if (usuarioLogueado.RolSeleccionado == Roles.Directora || usuarioLogueado.RolSeleccionado == Roles.Docente || usuarioLogueado.RolSeleccionado == Roles.Padre)
+            if (nota.Titulo != null && nota.Descripcion != null)
             {
-                
+                if (usuarioLogueado.RolSeleccionado == Roles.Directora)
+                {
+                    if (salas != null)
+                    {
+                        foreach (var sala in salas)
+                        {
+                            if (hijos == null)
+                            {
+                                foreach (var alumno in ObtenerHijos())
+                                {
+                                    if (alumno.Sala == sala)
+                                    {
+                                        int indice = alumno.Notas.Count();
+                                        alumno.Notas[indice] = nota;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                foreach (var hijo in hijos)
+                                {
+                                    foreach (var alumno in ObtenerHijos())
+                                    {
+                                        if (alumno.Id == hijo.Id & alumno.Sala == sala)
+                                        {
+                                            int indice = alumno.Notas.Count();
+                                            alumno.Notas[indice] = nota;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        resultado.Errores.Add("No se ha seleccionado ninguna sala ni alumno.");
+                    }
+                }
+                else
+                {
+                    if (usuarioLogueado.RolSeleccionado == Roles.Docente)
+                    {
+                        if (salas != null)
+                        {
+                            var bandera = true;
+                            Docente docente = ObtenerDocentes().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+                            foreach (var sala in docente.Salas)
+                            {
+                                if (salas.Contains(sala) == false)
+                                {
+                                    bandera = false;
+                                }
+                            }
+                            if (bandera == true)
+                            {
+                                foreach (var sala in salas)
+                                {
+                                    if (hijos == null)
+                                    {
+                                        foreach (var alumno in ObtenerHijos())
+                                        {
+                                            if (alumno.Sala == sala)
+                                            {
+                                                int indice = alumno.Notas.Count();
+                                                alumno.Notas[indice] = nota;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        foreach (var hijo in hijos)
+                                        {
+                                            foreach (var alumno in ObtenerHijos())
+                                            {
+                                                if (alumno.Id == hijo.Id & alumno.Sala == sala)
+                                                {
+                                                    int indice = alumno.Notas.Count();
+                                                    alumno.Notas[indice] = nota;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                resultado.Errores.Add("Se ha seleccionado una sala incorrecta.");
+                            }
+                        }
+                        else
+                        {
+                            resultado.Errores.Add("No se ha seleccionado ninguna sala ni alumno.");
+                        }
+                    }
+                    else
+                    {
+                        if (usuarioLogueado.RolSeleccionado == Roles.Padre)
+                        {
+                            if (hijos != null)
+                            {
+                                foreach (var hijo in hijos)
+                                {
+                                    foreach (var alumno in ObtenerHijos())
+                                    {
+                                        if (alumno.Id == hijo.Id)
+                                        {
+                                            int indice = alumno.Notas.Count();
+                                            alumno.Notas[indice] = nota;
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                resultado.Errores.Add("No se ha seleccionado ningun alumno.");
+                            }
+                        }
+                    }
+                }
             }
+            else
+            {
+                resultado.Errores.Add("Tiene que rellenar todos los campos.");
+            }
+            return resultado;
+        }
 
 
+        public Resultado MarcarNotaComoLeida(Nota nota, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            if (usuarioLogueado.RolSeleccionado == Roles.Padre)
+            {
+                Padre padre = ObtenerPadres().Where(x => x.Email == usuarioLogueado.Email && x.Apellido == usuarioLogueado.Apellido && x.Nombre == usuarioLogueado.Nombre).FirstOrDefault();
+                List<Hijo> hijos = padre.Hijos.ToList();
+                var bandera = false;
+                foreach (var hijo in hijos)
+                {
+                    foreach (var notita in hijo.Notas)
+                    {
+                        if (notita.Id == nota.Id)
+                        {
+                            nota.Leida = true;
+                            bandera = true;
+                        }
+                    }
+                }
+                if (bandera == false)
+                {
+                    resultado.Errores.Add("La nota se ha seleccionado erroneamente.");
+                }
+            }
+            else
+            {
+                resultado.Errores.Add("El usuario no tiene el rol necesario para marcar la nota como leida.");
+            }
+            if (nota == null)
+                resultado.Errores.Add("No se ha seleccionado ninguna nota.");
+            
             return resultado;
         }
 
@@ -445,6 +594,18 @@ namespace Logica
             docente.Salas = salasDocente.ToArray();
 
             return resultado;
+        }
+
+        public Resultado DesasignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
+        {
+            var salasDocente = docente.Salas != null ? docente.Salas.ToList() : new List<Sala>();
+
+            if (salasDocente.Any(x => x.Id == sala.Id) == true)
+                salasDocente.Remove(sala);
+
+            docente.Salas = salasDocente.ToArray();
+
+            return new Resultado();
         }
 
         public bool VerificarCampos(Resultado resul, Directora directora, UsuarioLogueado usuarioLog)
