@@ -24,6 +24,9 @@ namespace Implementacion
             string directoras = @"C:\Datos\ArchivoDirectoras.txt";
             if (!File.Exists(directoras))
                 File.Create(directoras);
+        //    string notas = @"C:\Datos\ArchivoNotas.txt";
+        //    if (!File.Exists(notas))
+        //        File.Create(notas);
 
         }
         
@@ -54,7 +57,7 @@ namespace Implementacion
 
         public Resultado AsignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return AsignarDocenteSala(docente, sala, usuarioLogueado);
         }
 
         public Resultado AsignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
@@ -64,7 +67,7 @@ namespace Implementacion
 
         public Resultado DesasignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return DesasignarDocenteSala(docente, sala, usuarioLogueado);
         }
 
         public Resultado DesasignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
@@ -114,7 +117,7 @@ namespace Implementacion
 
         public Resultado MarcarNotaComoLeida(Nota nota, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return MarcarNotaComoLeida(nota, usuarioLogueado);
         }
 
         public Hijo ObtenerAlumnoPorId(UsuarioLogueado usuarioLogueado, int id)
@@ -159,7 +162,7 @@ namespace Implementacion
 
         public string ObtenerNombreGrupo()
         {
-            throw new NotImplementedException();
+            return $"Ramirez-Tabin";
         }
 
         public Padre ObtenerPadrePorId(UsuarioLogueado usuarioLogueado, int id)

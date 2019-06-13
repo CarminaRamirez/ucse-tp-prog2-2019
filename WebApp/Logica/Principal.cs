@@ -16,6 +16,7 @@ namespace Logica
             Usuarios = new List<Usuario>();
             Hijos = new List<Hijo>();
             Directoras = new List<Directora>();
+          //  Notas = new List<Nota>();
         }
         public List<Usuario> Usuarios { get; set; }
         public List<Hijo> Hijos { get; set; }
@@ -411,6 +412,8 @@ namespace Logica
         }
 
         //HAY QUE HACER UN ARCHIVO DE NOTAS Y OBTENER NOTAS PARA ESCRIBIRLAS
+
+        
         public Resultado AltaNota(Nota nota, Sala[] salas, Hijo[] hijos, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
@@ -428,7 +431,7 @@ namespace Logica
                                 {
                                     if (alumno.Sala == sala)
                                     {
-                                        int indice = alumno.Notas.Count();
+                                        int indice = alumno.Notas.Count()-1;
                                         alumno.Notas[indice] = nota;
                                     }
                                 }
@@ -441,7 +444,7 @@ namespace Logica
                                     {
                                         if (alumno.Id == hijo.Id & alumno.Sala == sala)
                                         {
-                                            int indice = alumno.Notas.Count();
+                                            int indice = alumno.Notas.Count() - 1;
                                             alumno.Notas[indice] = nota;
                                         }
                                     }
@@ -479,7 +482,7 @@ namespace Logica
                                         {
                                             if (alumno.Sala == sala)
                                             {
-                                                int indice = alumno.Notas.Count();
+                                                int indice = alumno.Notas.Count()-1;
                                                 alumno.Notas[indice] = nota;
                                             }
                                         }
@@ -492,7 +495,7 @@ namespace Logica
                                             {
                                                 if (alumno.Id == hijo.Id & alumno.Sala == sala)
                                                 {
-                                                    int indice = alumno.Notas.Count();
+                                                    int indice = alumno.Notas.Count()-1;
                                                     alumno.Notas[indice] = nota;
                                                 }
                                             }
@@ -514,16 +517,20 @@ namespace Logica
                     {
                         if (usuarioLogueado.RolSeleccionado == Roles.Padre)
                         {
+                            Padre padre = ObtenerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
                             if (hijos != null)
                             {
                                 foreach (var hijo in hijos)
                                 {
                                     foreach (var alumno in ObtenerHijos())
                                     {
-                                        if (alumno.Id == hijo.Id)
+                                        foreach (var hijodelpadre in padre.Hijos)
                                         {
-                                            int indice = alumno.Notas.Count();
-                                            alumno.Notas[indice] = nota;
+                                            if (hijodelpadre == alumno && alumno.Id == hijo.Id)
+                                            {
+                                                int indice = alumno.Notas.Count()-1;
+                                                alumno.Notas[indice] = nota;
+                                            }
                                         }
                                     }
                                 }
@@ -742,7 +749,6 @@ namespace Logica
             else
                 return lista;
         }
-
 
         public List<Directora> ObtenerDirectoras()
         {
