@@ -12,13 +12,14 @@ namespace Logica
     public class Principal
     {
         public Principal()
-        {
-            Usuarios = new List<Usuario>();
+        {            
             Hijos = new List<Hijo>();
             Directoras = new List<Directora>();
-          //  Notas = new List<Nota>();
+            Padres = new List<Padre>();
+            Docentes = new List<Docente>();
+            Notas = new List<Nota>();         
         }
-        public List<Usuario> Usuarios { get; set; }
+        
         public List<Hijo> Hijos { get; set; }
         public List<Directora> Directoras { get; set; }
         public List<Padre> Padres { get; set; }
@@ -106,31 +107,6 @@ namespace Logica
             return usuario;
         }
 
-        public List<Usuario> ObtenerUsuarios()
-        {
-            string path = @"C:\Datos\ArchivoUsuarios.txt";
-            List<Usuario> lista = new List<Usuario>();
-            using (StreamReader leer = new StreamReader(path))
-            {
-                string contenido = leer.ReadToEnd();
-                lista = JsonConvert.DeserializeObject<List<Usuario>>(contenido);
-            }
-            if (lista == null)// ==> devolver 
-                return new List<Usuario>();
-            else
-                return lista;
-        }
-
-        public void EscribirUsuarios(List<Usuario> usuarios)
-        {
-            string path = @"C:\Datos\ArchivoUsuarios.txt";
-            using (StreamWriter archivo = new System.IO.StreamWriter(path, false))
-            {
-                string output = JsonConvert.SerializeObject(usuarios);
-                archivo.Write(output);
-            }
-        }
-
         public void EscribirClaves(List<Clave> claves)
         {
             string path = @"C:\Datos\ArchivoClaves.txt";
@@ -141,6 +117,35 @@ namespace Logica
             }
         }
 
+        public void EscribirHijos(List<Hijo> hijos)
+        {
+            string path = @"C:\Datos\ArchivoHijos.txt";
+            using (StreamWriter archivo = new System.IO.StreamWriter(path, false))
+            {
+                string output = JsonConvert.SerializeObject(hijos);
+                archivo.Write(output);
+            }
+        }
+
+        public void EscribirDocentes(List<Docente> docentes)
+        {
+            string path = @"C:\Datos\ArchivoClaves.txt";
+            using (StreamWriter archivo = new System.IO.StreamWriter(path, false))
+            {
+                string output = JsonConvert.SerializeObject(docentes);
+                archivo.Write(output);
+            }
+        }
+
+        public void EscribirPadres(List<Padre> padres)
+        {
+            string path = @"C:\Datos\ArchivoPadres.txt";
+            using (StreamWriter archivo = new System.IO.StreamWriter(path, false))
+            {
+                string output = JsonConvert.SerializeObject(padres);
+                archivo.Write(output);
+            }
+        }
 
         public void EscribirDirectoras(List<Directora> directoras)
         {
@@ -152,6 +157,130 @@ namespace Logica
             }
         }
 
+
+        public Resultado AAlumno(Hijo hijo, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            if (VerificarCampos(resultado, hijo, usuarioLogueado))
+            {
+                Hijos = ObtenerHijos();
+                List<Clave> claves = ObtenerClaves();
+                hijo.Id = Hijos.Count() + 1;
+                Hijos.Add(hijo);
+                EscribirHijos(Hijos);
+                Clave clave = new Clave();
+                Random random = new Random();
+                clave.Contrasena = random.Next(10000000, 99999999).ToString();
+                clave.Email = hijo.Email;
+                clave.Roles = usuarioLogueado.Roles;
+                claves.Add(clave);
+                EscribirClaves(claves);
+
+            }
+            return resultado;
+        }
+
+        public Resultado MAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            if (VerificarCampos(resultado, hijo, usuarioLogueado))
+            {
+                List<Hijo> hijos = ObtenerHijos();
+                bool band = false;
+                foreach (var hij in hijos)
+                {
+                    if (hij.Id == id)
+                    {
+                        List<Clave> claves = ObtenerClaves();
+                        foreach (var clave in claves)
+                        {
+                            if (clave.Email == usuarioLogueado.Email)
+                            {
+                                clave.Email = hijo.Email;
+                                EscribirClaves(claves);
+                                hij.Apellido = hijo.Apellido;
+                                hij.Email = hijo.Email;
+                                hij.FechaNacimiento = hijo.FechaNacimiento;
+                                hij.Institucion = hijo.Institucion;
+                                hij.Nombre = hijo.Nombre;
+                                hij.Notas = hijo.Notas;
+                                hij.ResultadoUltimaEvaluacionAnual = hij.ResultadoUltimaEvaluacionAnual;
+                                hij.Sala = hijo.Sala;
+                                EscribirHijos(hijos);
+                                Hijos = hijos;
+                                band = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (band == false)
+                {
+                    resultado.Errores.Add("No se encontró el usuario.");
+                }
+            }
+            return resultado;
+        }
+
+        public Resultado BAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            
+                List<Clave> claves = ObtenerClaves();
+                bool band = false;
+                int x = -1;
+                int x2 = -1;
+                foreach (var item in claves)
+                {
+                    x++;
+                    if (item.Email == usuarioLogueado.Email)
+                    {
+                        foreach (var item2 in Hijos)
+                        {
+                            x2++;
+                            if (item2.Id == id)
+                            {
+                                band = true;
+                                break;
+                            }
+
+                        }
+                        break;
+                    }
+
+                }
+                if (band == true)
+                {
+                    claves.RemoveAt(x);
+                    EscribirClaves(claves);
+                    Hijos.RemoveAt(x2);
+                    EscribirHijos(Hijos);
+                }
+                else
+                {
+                    resultado.Errores.Add("No se encontró el usuario.");
+                }
+            
+            return resultado;
+        }
+
+        public Hijo ObtenerAlumnoPorId(UsuarioLogueado usuarioLogueado, int id)
+        {
+            Hijo hijo = new Hijo();
+            hijo = ObtenerHijos().Where(x => x.Id == id).FirstOrDefault();
+            return hijo;
+        }
+
+        public Grilla<Hijo> ObtenerAlumnos(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
+        {
+            Grilla<Hijo> grilla = new Grilla<Hijo>();
+            List<Hijo> lista = ObtenerHijos();
+            grilla.Lista = lista.Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal) || x.Email.Contains(busquedaGlobal)).Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray();
+            grilla.CantidadRegistros = lista.Count;
+            return grilla;
+        }
+
+
         public Resultado ADirectora(Directora directora, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
@@ -161,7 +290,7 @@ namespace Logica
                 Directoras = ObtenerDirectoras();
                 List<Clave> claves = ObtenerClaves();
                 directora.Id = Directoras.Count() + 1;
-                Usuarios.Add(directora);
+                
                 Directoras.Add(directora);
                 EscribirDirectoras(Directoras);
                 //EscribirUsuarios(Usuarios);
@@ -265,13 +394,9 @@ namespace Logica
 
         public Directora ObtenerDirectoraPorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            //List<Clave> claves = ObtenerClaves();
             Directora dire = new Directora();
-            //foreach (var item in claves)
-            //{
-                if (Roles.Directora == usuarioLogueado.RolSeleccionado)
-                    dire = ObtenerDirectoras().Where(x => x.Id == id).FirstOrDefault();
-            //}
+            if (Roles.Directora == usuarioLogueado.RolSeleccionado)
+                dire = ObtenerDirectoras().Where(x => x.Id == id).FirstOrDefault();
             return dire;
         }
 
@@ -284,14 +409,17 @@ namespace Logica
             return grilla;
         }
 
+
         public Resultado ADocente(Docente docente, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
             if (VerificarCampos(resultado, docente, usuarioLogueado))
             {
-                Usuarios.Add(docente);
-                EscribirUsuarios(Usuarios);
+                Directoras = ObtenerDirectoras();
                 List<Clave> claves = ObtenerClaves();
+                docente.Id = Directoras.Count() + 1;
+                Docentes.Add(docente);
+                EscribirDirectoras(Directoras);
                 Clave clave = new Clave();
                 Random random = new Random();
                 clave.Contrasena = random.Next(10000000, 99999999).ToString();
@@ -299,17 +427,17 @@ namespace Logica
                 clave.Roles = usuarioLogueado.Roles;
                 claves.Add(clave);
                 EscribirClaves(claves);
+
             }
             return resultado;
         }
-
-
+        
         public Resultado BDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
             Roles rol = Roles.Docente;
             if (rol != usuarioLogueado.RolSeleccionado)
-                resultado.Errores.Add("El rol seleccionado no es el de Docente.");
+                resultado.Errores.Add("El rol seleccionado no es el de Diocente.");
             else
             {
                 List<Clave> claves = ObtenerClaves();
@@ -321,10 +449,10 @@ namespace Logica
                     x++;
                     if (item.Email == usuarioLogueado.Email)
                     {
-                        foreach (var item2 in Usuarios)
+                        foreach (var item2 in Docentes)
                         {
                             x2++;
-                            if (item2.Id == id & item2 is Docente)
+                            if (item2.Id == id)
                             {
                                 band = true;
                                 break;
@@ -333,42 +461,45 @@ namespace Logica
                         }
                         break;
                     }
+
                 }
                 if (band == true)
                 {
                     claves.RemoveAt(x);
                     EscribirClaves(claves);
-                    Usuarios.RemoveAt(x2);
-                    EscribirUsuarios(Usuarios);
+                    Docentes.RemoveAt(x2);
+                    EscribirDocentes(Docentes);
                 }
                 else
                 {
                     resultado.Errores.Add("No se encontró el usuario.");
                 }
-
             }
             return resultado;
         }
-
-
+        
         public Resultado MDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
             if (VerificarCampos(resultado, docente, usuarioLogueado))
             {
-                List<Usuario> usuarios = ObtenerUsuarios();
+                List<Docente> docentes = ObtenerDocentes();
                 bool band = false;
-                foreach (var usuario in usuarios)
+                foreach (var doc in docentes)
                 {
-                    if (usuario.Id == id & usuario is Docente)
+                    if (doc.Id == id)
                     {
                         List<Clave> claves = ObtenerClaves();
                         foreach (var clave in claves)
                         {
-                            if (usuario.Email == usuarioLogueado.Email)
+                            if (doc.Email == usuarioLogueado.Email)
                             {
                                 clave.Email = docente.Email;
                                 EscribirClaves(claves);
+                                doc.Apellido = docente.Apellido;
+                                doc.Email = docente.Email;
+                                doc.Nombre = docente.Nombre;
+                                doc.Salas = docente.Salas;
                                 band = true;
                                 break;
                             }
@@ -379,15 +510,25 @@ namespace Logica
                 {
                     resultado.Errores.Add("No se encontró el usuario.");
                 }
-                else
-                {
-                    Usuario direc = Usuarios.Where(x => x.Id == id && x is Docente).FirstOrDefault();
-                    Usuarios.Remove(direc);
-                    Usuarios.Add(docente);
-                    EscribirUsuarios(Usuarios);
-                }
             }
             return resultado;
+        }
+
+        public Docente ObtenerDocentePorId(UsuarioLogueado usuarioLogueado, int id)
+        {
+            Docente docente = new Docente();
+            if (Roles.Docente == usuarioLogueado.RolSeleccionado)
+                docente = ObtenerDocentes().Where(x => x.Id == id).FirstOrDefault();
+            return docente;
+        }
+
+        public Grilla<Docente> ObtenerDocentes(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
+        {
+            Grilla<Docente> grilla = new Grilla<Docente>();
+            List<Docente> lista = ObtenerDocentes();
+            grilla.Lista = lista.Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal) || x.Email.Contains(busquedaGlobal)).Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray();
+            grilla.CantidadRegistros = lista.Count;
+            return grilla;
         }
 
 
@@ -397,9 +538,11 @@ namespace Logica
             Resultado resultado = new Resultado();
             if (VerificarCampos(resultado, padre, usuarioLogueado))
             {
-                Usuarios.Add(padre);
-                EscribirUsuarios(Usuarios);
+                Directoras = ObtenerDirectoras();
                 List<Clave> claves = ObtenerClaves();
+                padre.Id = Padres.Count() + 1;
+                Padres.Add(padre);
+                EscribirDirectoras(Directoras);
                 Clave clave = new Clave();
                 Random random = new Random();
                 clave.Contrasena = random.Next(10000000, 99999999).ToString();
@@ -407,13 +550,113 @@ namespace Logica
                 clave.Roles = usuarioLogueado.Roles;
                 claves.Add(clave);
                 EscribirClaves(claves);
+
             }
             return resultado;
         }
 
-        //HAY QUE HACER UN ARCHIVO DE NOTAS Y OBTENER NOTAS PARA ESCRIBIRLAS
+        public Resultado MPadre(int id, Padre padre, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            if (VerificarCampos(resultado, padre, usuarioLogueado))
+            {
+                List<Padre> padres = ObtenerPadres();
+                bool band = false;
+                foreach (var pa in padres)
+                {
+                    if (pa.Id == id)
+                    {
+                        List<Clave> claves = ObtenerClaves();
+                        foreach (var clave in claves)
+                        {
+                            if (clave.Email == usuarioLogueado.Email)
+                            {
+                                clave.Email = padre.Email;
+                                EscribirClaves(claves);
+                                pa.Apellido = padre.Apellido;
+                                pa.Nombre = padre.Nombre;
+                                pa.Email = padre.Email;
+                                EscribirPadres(padres);
+                                Padres = padres;
+                                band = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (band == false)
+                {
+                    resultado.Errores.Add("No se encontró el usuario.");
+                }
+            }
+            return resultado;
+        }
 
+        public Resultado BPadre(int id, Padre padre, UsuarioLogueado usuarioLogueado)
+        {
+            Resultado resultado = new Resultado();
+            Roles rol = Roles.Padre;
+            if (rol != usuarioLogueado.RolSeleccionado)
+                resultado.Errores.Add("El rol seleccionado no es el de Padre.");
+            else
+            {
+                List<Clave> claves = ObtenerClaves();
+                bool band = false;
+                int x = -1;
+                int x2 = -1;
+                foreach (var item in claves)
+                {
+                    x++;
+                    if (item.Email == usuarioLogueado.Email)
+                    {
+                        foreach (var item2 in Padres)
+                        {
+                            x2++;
+                            if (item2.Id == id)
+                            {
+                                band = true;
+                                break;
+                            }
+
+                        }
+                        break;
+                    }
+
+                }
+                if (band == true)
+                {
+                    claves.RemoveAt(x);
+                    EscribirClaves(claves);
+                    Padres.RemoveAt(x2);
+                    EscribirPadres(Padres);
+                }
+                else
+                {
+                    resultado.Errores.Add("No se encontró el usuario.");
+                }
+            }
+            return resultado;
+        }
+
+        public Padre ObtenerPadrePorId(UsuarioLogueado usuarioLogueado, int id)
+        {
+            Padre padre = new Padre();
+            if (Roles.Padre == usuarioLogueado.RolSeleccionado)
+                padre = ObtenerPadres().Where(x => x.Id == id).FirstOrDefault();
+            return padre;
+        }
         
+        public Grilla<Padre> ObtenerPadres(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
+        {
+            Grilla<Padre> grilla = new Grilla<Padre>();
+            List<Padre> lista = ObtenerPadres();
+            grilla.Lista = lista.Where(x => string.IsNullOrEmpty(busquedaGlobal) || x.Nombre.Contains(busquedaGlobal) || x.Apellido.Contains(busquedaGlobal) || x.Email.Contains(busquedaGlobal)).Skip(paginaActual * totalPorPagina).Take(totalPorPagina).ToArray();
+            grilla.CantidadRegistros = lista.Count;
+            return grilla;
+        }
+        
+
+        //HAY QUE HACER UN ARCHIVO DE NOTAS Y OBTENER NOTAS PARA ESCRIBIRLAS
         public Resultado AltaNota(Nota nota, Sala[] salas, Hijo[] hijos, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
@@ -550,7 +793,6 @@ namespace Logica
             return resultado;
         }
 
-
         public Resultado MarcarNotaComoLeida(Nota nota, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
@@ -614,6 +856,7 @@ namespace Logica
 
             return new Resultado();
         }
+
 
         public bool VerificarCampos(Resultado resul, Directora directora, UsuarioLogueado usuarioLog)
         {
@@ -735,6 +978,7 @@ namespace Logica
             return resul.EsValido;
         }
 
+
         public List<Clave> ObtenerClaves()
         {
             string path = @"C:\Datos\ArchivoClaves.txt";
@@ -808,6 +1052,37 @@ namespace Logica
                 return new List<Hijo>();
             else
                 return lista;
+        }
+
+
+        public Resultado AsignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Resultado DesasignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Nota[] ObtenerCuadernoComunicaciones(int idPersona, UsuarioLogueado usuarioLogueado)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Hijo[] ObtenerPersonas(UsuarioLogueado usuarioLogueado)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Sala[] ObtenerSalasPorInstitucion(UsuarioLogueado usuarioLogueado)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Resultado ResponderNota(Nota nota, Comentario nuevoComentario, UsuarioLogueado usuarioLogueado)
+        {
+            throw new NotImplementedException();
         }
     }
 }

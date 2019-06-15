@@ -15,24 +15,29 @@ namespace Implementacion
         public ImplementacionWeb()
         {
             Principal = new Principal();
-            string usuarios = @"C:\Datos\ArchivoUsuarios.txt";
-            if (!File.Exists(usuarios))
-                File.Create(usuarios);
             string claves = @"C:\Datos\ArchivoClaves.txt";
             if (!File.Exists(claves))
                 File.Create(claves);
             string directoras = @"C:\Datos\ArchivoDirectoras.txt";
             if (!File.Exists(directoras))
                 File.Create(directoras);
-        //    string notas = @"C:\Datos\ArchivoNotas.txt";
-        //    if (!File.Exists(notas))
-        //        File.Create(notas);
-
+            string notas = @"C:\Datos\ArchivoNotas.txt";
+            if (!File.Exists(notas))
+                File.Create(notas);
+            string padres = @"C:\Datos\ArchivoPadres.txt";
+            if (!File.Exists(padres))
+                File.Create(padres);
+            string docentes = @"C:\Datos\ArchivoDocentes.txt";
+            if (!File.Exists(docentes))
+                File.Create(docentes);
+            string hijos = @"C:\Datos\ArchivoHijos.txt";
+            if (!File.Exists(hijos))
+                File.Create(hijos);
         }
         
         public Resultado AltaAlumno(Hijo hijo, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.AAlumno(hijo, usuarioLogueado);
         }
 
         public Resultado AltaDirectora(Directora directora, UsuarioLogueado usuarioLogueado)
@@ -42,7 +47,7 @@ namespace Implementacion
 
         public Resultado AltaDocente(Docente docente, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+           return Principal.ADocente(docente, usuarioLogueado);
         }
 
         public Resultado AltaNota(Nota nota, Sala[] salas, Hijo[] hijos, UsuarioLogueado usuarioLogueado)
@@ -77,7 +82,7 @@ namespace Implementacion
 
         public Resultado EditarAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.MAlumno(id, hijo, usuarioLogueado);
         }
 
         public Resultado EditarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
@@ -87,17 +92,17 @@ namespace Implementacion
 
         public Resultado EditarDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.MDocente(id, docente, usuarioLogueado);
         }
 
         public Resultado EditarPadreMadre(int id, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.MPadre(id, padre, usuarioLogueado);
         }
 
         public Resultado EliminarAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.BAlumno(id, hijo, usuarioLogueado);
         }
 
         public Resultado EliminarDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
@@ -107,12 +112,12 @@ namespace Implementacion
 
         public Resultado EliminarDocente(int id, Docente docente, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.BDocente(id, docente, usuarioLogueado);
         }
 
         public Resultado EliminarPadreMadre(int id, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.BPadre(id, padre, usuarioLogueado);
         }
 
         public Resultado MarcarNotaComoLeida(Nota nota, UsuarioLogueado usuarioLogueado)
@@ -122,12 +127,12 @@ namespace Implementacion
 
         public Hijo ObtenerAlumnoPorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            throw new NotImplementedException();
+            return Principal.ObtenerAlumnoPorId(usuarioLogueado, id);
         }
 
         public Grilla<Hijo> ObtenerAlumnos(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
-            throw new NotImplementedException();
+            return Principal.ObtenerAlumnos(usuarioLogueado, paginaActual, totalPorPagina, busquedaGlobal);
         }
 
         public Nota[] ObtenerCuadernoComunicaciones(int idPersona, UsuarioLogueado usuarioLogueado)
@@ -147,12 +152,12 @@ namespace Implementacion
 
         public Docente ObtenerDocentePorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            throw new NotImplementedException();
+            return Principal.ObtenerDocentePorId(usuarioLogueado, id);
         }
 
         public Grilla<Docente> ObtenerDocentes(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
-            throw new NotImplementedException();
+            return Principal.ObtenerDocentes(usuarioLogueado, paginaActual, totalPorPagina, busquedaGlobal);
         }
 
         public Institucion[] ObtenerInstituciones()
@@ -167,12 +172,12 @@ namespace Implementacion
 
         public Padre ObtenerPadrePorId(UsuarioLogueado usuarioLogueado, int id)
         {
-            throw new NotImplementedException();
+            return Principal.ObtenerPadrePorId(usuarioLogueado, id);
         }
 
         public Grilla<Padre> ObtenerPadres(UsuarioLogueado usuarioLogueado, int paginaActual, int totalPorPagina, string busquedaGlobal)
         {
-            throw new NotImplementedException();
+            return Principal.ObtenerPadres(usuarioLogueado, paginaActual, totalPorPagina, busquedaGlobal);
         }
 
         public Hijo[] ObtenerPersonas(UsuarioLogueado usuarioLogueado)
