@@ -67,7 +67,7 @@ namespace Implementacion
 
         public Resultado AsignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.AsignarHijoPadre(hijo, padre, usuarioLogueado);
         }
 
         public Resultado DesasignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
@@ -77,7 +77,7 @@ namespace Implementacion
 
         public Resultado DesasignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.DesasignarHijoPadre(hijo, padre, usuarioLogueado);
         }
 
         public Resultado EditarAlumno(int id, Hijo hijo, UsuarioLogueado usuarioLogueado)
@@ -137,7 +137,7 @@ namespace Implementacion
 
         public Nota[] ObtenerCuadernoComunicaciones(int idPersona, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.ObtenerCuadernoComunicaciones(idPersona, usuarioLogueado);
         }
 
         public Directora ObtenerDirectoraPorId(UsuarioLogueado usuarioLogueado, int id)
@@ -182,12 +182,12 @@ namespace Implementacion
 
         public Hijo[] ObtenerPersonas(UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.ObtenerPersonas(usuarioLogueado);
         }
 
         public Sala[] ObtenerSalasPorInstitucion(UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.ObtenerSalasPorInstitucion(usuarioLogueado);
         }
 
         public UsuarioLogueado ObtenerUsuario(string email, string clave)
@@ -197,7 +197,7 @@ namespace Implementacion
 
         public Resultado ResponderNota(Nota nota, Comentario nuevoComentario, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return Principal.ResponderNota(nota, nuevoComentario, usuarioLogueado);
         }
     }
 }

@@ -1057,31 +1057,147 @@ namespace Logica
 
         public Resultado AsignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            Resultado resultado = new Resultado();
+            List<Padre> padres = ObtenerPadres();
+            bool flag = false;
+            foreach (var pad in padres)
+            {
+                if (pad.Id == padre.Id)
+                {
+                    int indice = padre.Hijos.Count();
+                    padre.Hijos[indice] = hijo;
+                    EscribirPadres(padres);
+                    flag = true;
+                    break;
+                }
+            }
+            if (flag == false)
+                resultado.Errores.Add("El padre no se encuentra registrado.");
+            return resultado;
         }
 
         public Resultado DesasignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            Resultado resultado = new Resultado();
+            List<Hijo> hijos = new List<Hijo>();
+            List<Padre> padres = ObtenerPadres();
+            bool flag = false;
+            if (usuarioLogueado.RolSeleccionado == Roles.Padre)
+            {
+                foreach (var pad in padres)
+                {
+                    if (pad.Id == padre.Id)
+                    {
+                        hijos = pad.Hijos.ToList();
+                        foreach (var hij in hijos)
+                        {
+                            if (hij == hijo)
+                            {
+                                hijos.Remove(hij);
+                                flag = true;
+                                break;
+                            }
+                        }
+                        pad.Hijos = hijos.ToArray();
+                        break;
+                    }
+                    if (hijos == null)
+                        resultado.Errores.Add("Padre no encontrado.");
+                    else
+                    {
+                        if (flag == false)
+                            resultado.Errores.Add("Hijo no encontrado.");
+                    }
+                }
+            }
+            else
+                resultado.Errores.Add("Rol no corresponde a padre/madre.");
+            return resultado;
         }
 
         public Nota[] ObtenerCuadernoComunicaciones(int idPersona, UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            return ObtenerHijos().Where(x => x.Id == idPersona).FirstOrDefault().Notas;
         }
 
         public Hijo[] ObtenerPersonas(UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            List<Hijo> hijos = new List<Hijo>();
+            if (usuarioLogueado.RolSeleccionado == Roles.Padre)
+            {
+                foreach (var padre in ObtenerPadres())
+                {
+                    if (padre.Email == usuarioLogueado.Email)
+                    {
+                        hijos = padre.Hijos.ToList();
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                if (usuarioLogueado.RolSeleccionado == Roles.Docente)
+                {
+                    Docente docente = ObtenerDocentes().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
+                    foreach (var sala in docente.Salas)
+                    {
+                        foreach (var alumno in ObtenerHijos())
+                        {
+                            if (alumno.Sala == sala & hijos.Any(x => x == alumno) == false)
+                                hijos.Add(alumno);
+                        }
+                    }
+                }
+                else
+                {
+                    if (usuarioLogueado.RolSeleccionado == Roles.Directora)
+                        hijos.AddRange(ObtenerHijos());
+                }
+            }
+            return hijos.ToArray();
         }
 
         public Sala[] ObtenerSalasPorInstitucion(UsuarioLogueado usuarioLogueado)
         {
-            throw new NotImplementedException();
+            List<Sala> salas = new List<Sala>();
+            foreach (var docente in ObtenerDocentes())
+            {
+                foreach (var sala in docente.Salas)
+                {
+                    Sala sa = salas.Where(x => x.Id == sala.Id).FirstOrDefault();
+                    if (sa == null)
+                        salas.Add(sala);
+                }
+            }
+            return salas.ToArray();
         }
 
         public Resultado ResponderNota(Nota nota, Comentario nuevoComentario, UsuarioLogueado usuarioLogueado)
         {
+            Resultado resultado = new Resultado();
+            List<Nota> notas = new List<Nota>();
+            bool flag = false;
+            if (usuarioLogueado.RolSeleccionado == Roles.Padre | usuarioLogueado.RolSeleccionado == Roles.Docente | usuarioLogueado.RolSeleccionado == Roles.Directora)
+            {
+                foreach (var hijo in ObtenerHijos())
+                {
+                    foreach (var not in hijo.Notas)
+                    {
+                        if (not == nota)
+                        {
+                            int indice = nota.Comentarios.Count();
+                            nota.Comentarios[indice] = nuevoComentario;
+                            flag = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+                resultado.Errores.Add("No es posible agregar comentario con el rol seleccionado.");
+            if (flag == false)
+                resultado.Errores.Add("No se ha encontrado la nota correspondiente.");
+            
             throw new NotImplementedException();
         }
     }

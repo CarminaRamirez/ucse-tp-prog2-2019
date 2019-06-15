@@ -10,7 +10,7 @@ using WebApp.Controllers;
 
 namespace WebApp.Grid
 {
-	public static class DirectoresGrid
+	public static class DirectoresGrid 
 	{
 		internal static void Register()
 		{
