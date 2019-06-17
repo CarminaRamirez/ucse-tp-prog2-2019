@@ -1,0 +1,1 @@
+[{"Email":"nico@gmail.com","Contrasena":"nico","Roles":[1]},{"Email":"carmi@gmail.com","Contrasena":"carmi","Roles":[1]},{"Email":"maria@gmail.com","Contrasena":"maria","Roles":[2]},{"Email":"mariano@gmail.com","Contrasena":"mariano","Roles":[0]},{"Email":"fer@gmail.com","Contrasena":"fer","Roles":[0]}]

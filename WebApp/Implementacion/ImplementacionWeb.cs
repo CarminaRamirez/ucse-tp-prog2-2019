@@ -15,24 +15,27 @@ namespace Implementacion
         public ImplementacionWeb()
         {
             Principal = new Principal();
-            string claves = @"C:\Datos\ArchivoClaves.txt";
+            string claves = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArchivoClaves.txt");
             if (!File.Exists(claves))
                 File.Create(claves);
-            string directoras = @"C:\Datos\ArchivoDirectoras.txt";
+            string directoras = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArchivoDirectoras.txt");
             if (!File.Exists(directoras))
                 File.Create(directoras);
-            string notas = @"C:\Datos\ArchivoNotas.txt";
+            string notas = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArchivoNotas.txt");
             if (!File.Exists(notas))
                 File.Create(notas);
-            string padres = @"C:\Datos\ArchivoPadres.txt";
+            string padres = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArchivoPadres.txt");
             if (!File.Exists(padres))
                 File.Create(padres);
-            string docentes = @"C:\Datos\ArchivoDocentes.txt";
+            string docentes = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArchivoDocentes.txt");
             if (!File.Exists(docentes))
                 File.Create(docentes);
-            string hijos = @"C:\Datos\ArchivoHijos.txt";
+            string hijos = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArchivoHijos.txt");
             if (!File.Exists(hijos))
                 File.Create(hijos);
+            string salas = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArchivoSalas.txt");
+            if (!File.Exists(salas))
+                File.Create(salas);
         }
         
         public Resultado AltaAlumno(Hijo hijo, UsuarioLogueado usuarioLogueado)
@@ -62,7 +65,7 @@ namespace Implementacion
 
         public Resultado AsignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
         {
-            return AsignarDocenteSala(docente, sala, usuarioLogueado);
+            return Principal.AsignarDocenteSala(docente, sala, usuarioLogueado);
         }
 
         public Resultado AsignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
@@ -72,7 +75,7 @@ namespace Implementacion
 
         public Resultado DesasignarDocenteSala(Docente docente, Sala sala, UsuarioLogueado usuarioLogueado)
         {
-            return DesasignarDocenteSala(docente, sala, usuarioLogueado);
+            return Principal.DesasignarDocenteSala(docente, sala, usuarioLogueado);
         }
 
         public Resultado DesasignarHijoPadre(Hijo hijo, Padre padre, UsuarioLogueado usuarioLogueado)
@@ -122,7 +125,7 @@ namespace Implementacion
 
         public Resultado MarcarNotaComoLeida(Nota nota, UsuarioLogueado usuarioLogueado)
         {
-            return MarcarNotaComoLeida(nota, usuarioLogueado);
+            return Principal.MarcarNotaComoLeida(nota, usuarioLogueado);
         }
 
         public Hijo ObtenerAlumnoPorId(UsuarioLogueado usuarioLogueado, int id)
