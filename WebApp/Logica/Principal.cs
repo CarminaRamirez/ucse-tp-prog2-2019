@@ -564,6 +564,7 @@ namespace Logica
             Notas = ObtenerNotas();
             nota.Id = Notas.Count() + 1;
             Hijos = ObtenerHijos();
+            List<Padre> listapadres = ObtenerPadres();
             if (nota.Titulo != null && nota.Descripcion != null)
             {
                 if (usuarioLogueado.RolSeleccionado == Roles.Directora)
@@ -578,11 +579,24 @@ namespace Logica
                                 {
                                     if (alumno.Sala.Id == sala.Id)
                                     {
-                                        List<Nota> notas = new List<Nota>();
+                                        List<Nota> notashijo = new List<Nota>();
                                         if (alumno.Notas != null)
-                                            notas = alumno.Notas.ToList();
-                                        notas.Add(nota);
-                                        alumno.Notas = notas.ToArray();
+                                            notashijo = alumno.Notas.ToList();
+                                        notashijo.Add(nota);
+                                        alumno.Notas = notashijo.ToArray();                                        
+                                        Padre padre = listapadres.Where(x => x.Hijos.Any(x2 => x2.Id == alumno.Id)).FirstOrDefault();
+                                        List<Nota> notaspadre = new List<Nota>();
+                                        Hijo hijopadre = padre.Hijos.Where(x => x.Id == alumno.Id).FirstOrDefault();
+                                        if (hijopadre.Notas != null)
+                                            notaspadre = hijopadre.Notas.ToList();
+                                        notaspadre.Add(nota);
+                                        foreach (var pad in listapadres)
+                                        {
+                                            if (pad.Id == padre.Id)
+                                            {
+                                                pad.Hijos.Where(x => x.Id == hijopadre.Id).FirstOrDefault().Notas = notaspadre.ToArray();
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -592,10 +606,26 @@ namespace Logica
                                 {
                                     foreach (var alumno in Hijos)
                                     {
-                                        if (alumno.Id == hijo.Id & alumno.Sala == sala)
+                                        if (alumno.Id == hijo.Id & alumno.Sala.Id == sala.Id)
                                         {
-                                            int indice = alumno.Notas.Count() - 1;
-                                            alumno.Notas[indice] = nota;
+                                            List<Nota> notashijo = new List<Nota>();
+                                            if (alumno.Notas != null)
+                                                notashijo = alumno.Notas.ToList();
+                                            notashijo.Add(nota);
+                                            alumno.Notas = notashijo.ToArray();
+                                            Padre padre = listapadres.Where(x => x.Hijos.Any(x2 => x2.Id == alumno.Id)).FirstOrDefault();
+                                            List<Nota> notaspadre = new List<Nota>();
+                                            Hijo hijopadre = padre.Hijos.Where(x => x.Id == alumno.Id).FirstOrDefault();
+                                            if (hijopadre.Notas != null)
+                                                notaspadre = hijopadre.Notas.ToList();
+                                            notaspadre.Add(nota);
+                                            foreach (var pad in listapadres)
+                                            {
+                                                if (pad.Id == padre.Id)
+                                                {
+                                                    pad.Hijos.Where(x => x.Id == hijopadre.Id).FirstOrDefault().Notas = notaspadre.ToArray();
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -612,51 +642,85 @@ namespace Logica
                     if (usuarioLogueado.RolSeleccionado == Roles.Docente)
                     {
                         if (salas != null)
-                        {
-                            var bandera = true;
+                        {                            
                             Docente docente = ObtenerDocentes().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
-                            foreach (var sala in docente.Salas)
+                            foreach (var salaparametro in salas)
                             {
-                                if (salas.Contains(sala) == false)
+                                var bandera = false;
+                                Sala salaseleccionada = new Sala();
+                                foreach (var sala in docente.Salas)
                                 {
-                                    bandera = false;
-                                }
-                            }
-                            if (bandera == true)
-                            {
-                                foreach (var sala in salas)
-                                {
-                                    if (hijos == null)
+                                    if (sala.Id == salaparametro.Id)
                                     {
-                                        foreach (var alumno in Hijos)
-                                        {
-                                            if (alumno.Sala == sala)
-                                            {
-                                                int indice = alumno.Notas.Count()-1;
-                                                alumno.Notas[indice] = nota;
-                                            }
-                                        }
+                                        bandera = true;
+                                        salaseleccionada = sala;
                                     }
-                                    else
-                                    {
-                                        foreach (var hijo in hijos)
+                                }
+                                if (bandera == true)
+                                {
+                                        if (hijos.Count() == 0)
                                         {
                                             foreach (var alumno in Hijos)
                                             {
-                                                if (alumno.Id == hijo.Id & alumno.Sala == sala)
+                                                if (alumno.Sala.Id == salaseleccionada.Id)
                                                 {
-                                                    int indice = alumno.Notas.Count()-1;
-                                                    alumno.Notas[indice] = nota;
+                                                    List<Nota> notashijo = new List<Nota>();
+                                                    if (alumno.Notas != null)
+                                                        notashijo = alumno.Notas.ToList();
+                                                    notashijo.Add(nota);
+                                                    alumno.Notas = notashijo.ToArray();
+                                                    Padre padre = listapadres.Where(x => x.Hijos.Any(x2 => x2.Id == alumno.Id)).FirstOrDefault();
+                                                    List<Nota> notaspadre = new List<Nota>();
+                                                    Hijo hijopadre = padre.Hijos.Where(x => x.Id == alumno.Id).FirstOrDefault();
+                                                    if (hijopadre.Notas != null)
+                                                        notaspadre = hijopadre.Notas.ToList();
+                                                    notaspadre.Add(nota);
+                                                    foreach (var pad in listapadres)
+                                                    {
+                                                        if (pad.Id == padre.Id)
+                                                        {
+                                                            pad.Hijos.Where(x => x.Id == hijopadre.Id).FirstOrDefault().Notas = notaspadre.ToArray();
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
+                                        else
+                                        {
+                                            foreach (var hijo in hijos)
+                                            {
+                                                foreach (var alumno in Hijos)
+                                                {
+                                                    if (alumno.Id == hijo.Id & alumno.Sala.Id == salaseleccionada.Id)
+                                                    {
+                                                        List<Nota> notashijo = new List<Nota>();
+                                                        if (alumno.Notas != null)
+                                                            notashijo = alumno.Notas.ToList();
+                                                        notashijo.Add(nota);
+                                                        alumno.Notas = notashijo.ToArray();
+                                                        Padre padre = listapadres.Where(x => x.Hijos.Any(x2 => x2.Id == alumno.Id)).FirstOrDefault();
+                                                        List<Nota> notaspadre = new List<Nota>();
+                                                        Hijo hijopadre = padre.Hijos.Where(x => x.Id == alumno.Id).FirstOrDefault();
+                                                        if (hijopadre.Notas != null)
+                                                            notaspadre = hijopadre.Notas.ToList();
+                                                        notaspadre.Add(nota);
+                                                        foreach (var pad in listapadres)
+                                                        {
+                                                            if (pad.Id == padre.Id)
+                                                            {
+                                                                pad.Hijos.Where(x => x.Id == hijopadre.Id).FirstOrDefault().Notas = notaspadre.ToArray();
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                 }
-                            }
-                            else
-                            {
-                                resultado.Errores.Add("Se ha seleccionado una sala incorrecta.");
-                            }
+                                else
+                                {
+                                    resultado.Errores.Add("Se ha seleccionado una sala incorrecta.");
+                                }
+                            }  
                         }
                         else
                         {
@@ -668,18 +732,33 @@ namespace Logica
                         if (usuarioLogueado.RolSeleccionado == Roles.Padre)
                         {
                             Padre padre = ObtenerPadres().Where(x => x.Email == usuarioLogueado.Email).FirstOrDefault();
-                            if (hijos != null)
+                            if (hijos.Count() != 0)
                             {
                                 foreach (var hijo in hijos)
                                 {
-                                    foreach (var alumno in ObtenerHijos())
+                                    foreach (var alumno in Hijos)
                                     {
                                         foreach (var hijodelpadre in padre.Hijos)
                                         {
-                                            if (hijodelpadre == alumno && alumno.Id == hijo.Id)
+                                            if (hijodelpadre.Id == alumno.Id && alumno.Id == hijo.Id)
                                             {
-                                                int indice = alumno.Notas.Count()-1;
-                                                alumno.Notas[indice] = nota;
+                                                List<Nota> notashijo = new List<Nota>();
+                                                if (alumno.Notas != null)
+                                                    notashijo = alumno.Notas.ToList();
+                                                notashijo.Add(nota);
+                                                alumno.Notas = notashijo.ToArray();
+                                                List<Nota> notaspadre = new List<Nota>();
+                                                Hijo hijopadre = padre.Hijos.Where(x => x.Id == alumno.Id).FirstOrDefault();
+                                                if (hijopadre.Notas != null)
+                                                    notaspadre = hijopadre.Notas.ToList();
+                                                notaspadre.Add(nota);
+                                                foreach (var pad in listapadres)
+                                                {
+                                                    if (pad.Id == padre.Id)
+                                                    {
+                                                        pad.Hijos.Where(x => x.Id == hijopadre.Id).FirstOrDefault().Notas = notaspadre.ToArray();
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -687,7 +766,32 @@ namespace Logica
                             }
                             else
                             {
-                                resultado.Errores.Add("No se ha seleccionado ningun alumno.");
+                                foreach (var hijj in Hijos)
+                                {
+                                    foreach (var hij in padre.Hijos)
+                                    {
+                                        if (hijj.Id == hij.Id)
+                                        {
+                                            List<Nota> notashijo = new List<Nota>();
+                                            if (hijj.Notas != null)
+                                                notashijo = hijj.Notas.ToList();
+                                            notashijo.Add(nota);
+                                            hijj.Notas = notashijo.ToArray();
+                                            List<Nota> notaspadre = new List<Nota>();
+                                            Hijo hijopadre = padre.Hijos.Where(x => x.Id == hij.Id).FirstOrDefault();
+                                            if (hijopadre.Notas != null)
+                                                notaspadre = hijopadre.Notas.ToList();
+                                            notaspadre.Add(nota);
+                                            foreach (var pad in listapadres)
+                                            {
+                                                if (pad.Id == padre.Id)
+                                                {
+                                                    pad.Hijos.Where(x => x.Id == hijopadre.Id).FirstOrDefault().Notas = notaspadre.ToArray();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }                                
                             }
                         }
                     }
@@ -702,18 +806,20 @@ namespace Logica
                 Notas.Add(nota);
                 EscribirNotas(Notas);
                 EscribirHijos(Hijos);
-            }
-            
-            
+                EscribirPadres(listapadres);
+            }           
             return resultado;
         }
 
+        //EDITAR ARCHIVOS DE PADRES E HIJOS, PREGUNTAR SOLAMENTE POR ROL PADRE
         public Resultado MarcarNotaComoLeida(Nota nota, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
             if (usuarioLogueado.RolSeleccionado == Roles.Padre)
             {
-                Padre padre = ObtenerPadres().Where(x => x.Email == usuarioLogueado.Email && x.Apellido == usuarioLogueado.Apellido && x.Nombre == usuarioLogueado.Nombre).FirstOrDefault();
+                Padres = ObtenerPadres();
+                Hijos = ObtenerHijos();
+                Padre padre = Padres.Where(x => x.Email == usuarioLogueado.Email && x.Apellido == usuarioLogueado.Apellido && x.Nombre == usuarioLogueado.Nombre).FirstOrDefault();
                 List<Hijo> hijos = padre.Hijos.ToList();
                 var bandera = false;
                 foreach (var hijo in hijos)
@@ -722,6 +828,10 @@ namespace Logica
                     {
                         if (notita.Id == nota.Id)
                         {
+                            foreach (var pad in Padres)
+                            {
+                                pad.Hijos.Where(x => x.Id == hijo.Id).FirstOrDefault().Notas.Where(x => x.Id == notita.Id).FirstOrDefault().Leida = true;
+                            }
                             nota.Leida = true;
                             bandera = true;
                         }
@@ -1097,7 +1207,7 @@ namespace Logica
                     {
                         foreach (var alumno in ObtenerHijos())
                         {
-                            if (alumno.Sala == sala & hijos.Any(x => x == alumno) == false)
+                            if (alumno.Sala.Id == sala.Id & hijos.Any(x => x == alumno) == false)
                                 hijos.Add(alumno);
                         }
                     }
@@ -1145,7 +1255,7 @@ namespace Logica
             if (flag == false)
                 resultado.Errores.Add("No se ha encontrado la nota correspondiente.");
             
-            throw new NotImplementedException();
+            return resultado;
         }
     }
 }
