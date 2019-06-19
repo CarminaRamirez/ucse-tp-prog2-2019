@@ -572,8 +572,15 @@ namespace Logica
                     if (salas != null)
                     {
                         foreach (var sala in salas)
-                        {
-                            if (hijos.Count() == 0)
+                        {   
+                            var hijosporsala = 0;
+                            foreach (var item in hijos)
+                            {
+                                Hijo hijito = Hijos.Where(x => x.Id == item.Id).FirstOrDefault();
+                                if (hijito.Sala.Id == sala.Id)
+                                    hijosporsala = hijosporsala + 1;
+                            }
+                            if (hijosporsala == 0)
                             {
                                 foreach (var alumno in Hijos)
                                 {
@@ -658,7 +665,14 @@ namespace Logica
                                 }
                                 if (bandera == true)
                                 {
-                                        if (hijos.Count() == 0)
+                                        var hijosporsala = 0;
+                                        foreach (var item in hijos)
+                                        {
+                                            Hijo hijito = Hijos.Where(x => x.Id == item.Id).FirstOrDefault();
+                                            if (hijito.Sala.Id == salaparametro.Id)
+                                                hijosporsala = hijosporsala + 1;
+                                        }
+                                        if (hijosporsala == 0)
                                         {
                                             foreach (var alumno in Hijos)
                                             {
