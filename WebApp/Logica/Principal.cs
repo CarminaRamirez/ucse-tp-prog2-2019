@@ -830,16 +830,25 @@ namespace Logica
                         {
                             foreach (var pad in Padres)
                             {
-                                pad.Hijos.Where(x => x.Id == hijo.Id).FirstOrDefault().Notas.Where(x => x.Id == notita.Id).FirstOrDefault().Leida = true;
+                                if (pad.Hijos != null)
+                                {
+                                    pad.Hijos.Where(x => x.Id == hijo.Id).FirstOrDefault().Notas.Where(x => x.Id == notita.Id).FirstOrDefault().Leida = true;
+                                    Hijos.Where(x => x.Id == hijo.Id).FirstOrDefault().Notas.Where(x => x.Id == notita.Id).FirstOrDefault().Leida = true;
+                                    bandera = true;
+                                }
+                                
                             }
-                            nota.Leida = true;
-                            bandera = true;
                         }
                     }
                 }
                 if (bandera == false)
                 {
                     resultado.Errores.Add("La nota se ha seleccionado erroneamente.");
+                }
+                else
+                {
+                    EscribirHijos(Hijos);
+                    EscribirPadres(Padres);
                 }
             }
             else
@@ -1181,7 +1190,10 @@ namespace Logica
 
         public Nota[] ObtenerCuadernoComunicaciones(int idPersona, UsuarioLogueado usuarioLogueado)
         {
-            return ObtenerHijos().Where(x => x.Id == idPersona).FirstOrDefault().Notas;
+            if (ObtenerHijos().Where(x => x.Id == idPersona).FirstOrDefault().Notas != null)
+                return ObtenerHijos().Where(x => x.Id == idPersona).FirstOrDefault().Notas;
+            else
+                return new List<Nota>().ToArray();
         }
 
         public Hijo[] ObtenerPersonas(UsuarioLogueado usuarioLogueado)
@@ -1193,8 +1205,11 @@ namespace Logica
                 {
                     if (padre.Email == usuarioLogueado.Email)
                     {
-                        hijos = padre.Hijos.ToList();
-                        break;
+                        if (padre.Hijos != null)
+                        {
+                            hijos = padre.Hijos.ToList();
+                            break;
+                        }
                     }
                 }
             }
@@ -1233,27 +1248,66 @@ namespace Logica
         {
             Resultado resultado = new Resultado();
             List<Nota> notas = new List<Nota>();
-            bool flag = false;
+            Hijos = ObtenerHijos();
+            Padres = ObtenerPadres();
+            Notas = ObtenerNotas();
             if (usuarioLogueado.RolSeleccionado == Roles.Padre | usuarioLogueado.RolSeleccionado == Roles.Docente | usuarioLogueado.RolSeleccionado == Roles.Directora)
             {
-                foreach (var hijo in ObtenerHijos())
+                foreach (var hijo in Hijos)
                 {
-                    foreach (var not in hijo.Notas)
+                    if (hijo.Notas != null)
                     {
-                        if (not == nota)
+                        foreach (var not in hijo.Notas)
                         {
-                            int indice = nota.Comentarios.Count();
-                            nota.Comentarios[indice] = nuevoComentario;
-                            flag = true;
-                            break;
+                            if (not.Id == nota.Id)
+                            {
+                                List<Comentario> comentarios = new List<Comentario>();
+                                comentarios = not.Comentarios.ToList();
+                                comentarios.Add(nuevoComentario);
+                                not.Comentarios = comentarios.ToArray();
+                            }
                         }
                     }
                 }
+                foreach (var padre in Padres)
+                {
+                    if (padre.Hijos != null)
+                    {
+                        foreach (var hijo in padre.Hijos)
+                        {
+                            if (hijo.Notas != null)
+                            {
+                                foreach (var not in hijo.Notas)
+                                {
+                                    if (not.Id == nota.Id)
+                                    {
+                                        List<Comentario> comentarios = new List<Comentario>();
+                                        comentarios = not.Comentarios.ToList();
+                                        comentarios.Add(nuevoComentario);
+                                        not.Comentarios = comentarios.ToArray();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                }
+                foreach (var not in Notas)
+                {
+                    if (not.Id == nota.Id)
+                    {
+                        List<Comentario> comentarios = new List<Comentario>();
+                        comentarios = not.Comentarios.ToList();
+                        comentarios.Add(nuevoComentario);
+                        not.Comentarios = comentarios.ToArray();
+                    }
+                }
+                EscribirNotas(Notas);
+                EscribirPadres(Padres);
+                EscribirHijos(Hijos);
             }
             else
                 resultado.Errores.Add("No es posible agregar comentario con el rol seleccionado.");
-            if (flag == false)
-                resultado.Errores.Add("No se ha encontrado la nota correspondiente.");
             
             return resultado;
         }
