@@ -20,7 +20,8 @@ namespace Logica
             Notas = new List<Nota>();
             Salas = ObtenerSalas();
         }
-        
+        //NO ES RECOMENDABLE USAR VAR GLOBALES MUCHO MENOS PUBLICAS
+        //ACOTAR ESTO AL AMBITO DE CADA METODO
         public List<Hijo> Hijos { get; set; }
         public List<Directora> Directoras { get; set; }
         public List<Padre> Padres { get; set; }
@@ -28,7 +29,7 @@ namespace Logica
         public List<Nota> Notas { get; set; }
         public List<Sala> Salas { get; set; }
         
-
+        //SE PODRIA RESOLVER MAS FACIL SIN DUPLICAR CODIGO
         public UsuarioLogueado Loguear(string email, string clave)
         {
             UsuarioLogueado usuario = new UsuarioLogueado();
@@ -94,6 +95,7 @@ namespace Logica
             return usuario;
         }
 
+        //ESTOS METODOS DE ESCRITURA DE DATOS PODRIAN IR EN UN ARCHIVO SEPARADO.
         public void EscribirClaves(List<Clave> claves)
         {
             string path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "ArchivoClaves.txt");
@@ -262,7 +264,7 @@ namespace Logica
             }
             return resultado;
         }
-
+        //USAR NOMBRES DESCRIPTIVOS DE METODOS
         public Resultado MDirectora(int id, Directora directora, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
@@ -558,6 +560,7 @@ namespace Logica
         
 
         //HAY QUE HACER UN ARCHIVO DE NOTAS Y OBTENER NOTAS PARA ESCRIBIRLAS
+        //SE PODRIA RESOLVER MUCHO MAS FACIL SIN DUPLICAR TANTO CODIGO.
         public Resultado AltaNota(Nota nota, Sala[] salas, Hijo[] hijos, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
@@ -1201,7 +1204,7 @@ namespace Logica
                 resultado.Errores.Add("Rol no corresponde a padre/madre.");
             return resultado;
         }
-
+        //SIEMPRE QUE SE USEN METODOS "OrDefault" PREGUNTAR ANTES SI NO ES NULL
         public Nota[] ObtenerCuadernoComunicaciones(int idPersona, UsuarioLogueado usuarioLogueado)
         {
             if (ObtenerHijos().Where(x => x.Id == idPersona).FirstOrDefault().Notas != null)
@@ -1257,7 +1260,7 @@ namespace Logica
                 salas = ObtenerSalas();
             return salas.ToArray();
         }
-
+                
         public Resultado ResponderNota(Nota nota, Comentario nuevoComentario, UsuarioLogueado usuarioLogueado)
         {
             Resultado resultado = new Resultado();
@@ -1265,6 +1268,8 @@ namespace Logica
             Hijos = ObtenerHijos();
             Padres = ObtenerPadres();
             Notas = ObtenerNotas();
+
+            //ESTA PREGUNTA NO SIRVE PORQ SIEMPRE VA A TENER ALGUNO DE ESTOS ROLES
             if (usuarioLogueado.RolSeleccionado == Roles.Padre | usuarioLogueado.RolSeleccionado == Roles.Docente | usuarioLogueado.RolSeleccionado == Roles.Directora)
             {
                 foreach (var hijo in Hijos)
